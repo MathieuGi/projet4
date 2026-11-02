@@ -22,16 +22,16 @@ export class LoginComponent {
   private sessionService = inject(SessionService);
   private destroyRef = inject(DestroyRef);
 
-  public hide = true;
-  public onError = false;
+  public hide: boolean = true;
+  public onError: boolean = false;
 
-  public form = this.fb.group({
+  public form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.min(3)]],
   });
 
   public submit(): void {
-    const loginRequest = this.form.value as LoginRequest;
+    const loginRequest: LoginRequest = this.form.getRawValue();
     this.authService
       .login(loginRequest)
       .pipe(takeUntilDestroyed(this.destroyRef), take(1))

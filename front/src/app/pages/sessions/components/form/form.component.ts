@@ -9,7 +9,8 @@ import { SessionApiService } from '../../../../core/service/session-api.service'
 import { MaterialModule } from '../../../../shared/material.module';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { take } from 'rxjs';
+import { Observable, take } from 'rxjs';
+import { Teacher } from 'src/app/core/models/teacher.interface';
 
 @Component({
   selector: 'app-form',
@@ -29,14 +30,14 @@ export class FormComponent implements OnInit {
 
   public onUpdate: boolean = false;
   public sessionForm: FormGroup | undefined;
-  public teachers$ = this.teacherService.all();
+  public teachers$: Observable<Teacher[]> = this.teacherService.all();
   private id: string | undefined;
 
   ngOnInit(): void {
     if (!this.sessionService.sessionInformation!.admin) {
       this.router.navigate(['/sessions']);
     }
-    const url = this.router.url;
+    const url: string = this.router.url;
     if (url.includes('update')) {
       this.onUpdate = true;
       this.id = this.route.snapshot.paramMap.get('id')!;
@@ -50,7 +51,7 @@ export class FormComponent implements OnInit {
   }
 
   public submit(): void {
-    const session = this.sessionForm?.value as Session;
+    const session: Session = this.sessionForm?.getRawValue();
 
     if (!this.onUpdate) {
       this.sessionApiService
@@ -66,7 +67,7 @@ export class FormComponent implements OnInit {
   }
 
   private initForm(session?: Session): void {
-    this.sessionForm = this.fb.group({
+    this.sessionForm = this.fb.nonNullable.group({
       name: [session ? session.name : '', [Validators.required]],
       date: [
         session ? new Date(session.date).toISOString().split('T')[0] : '',

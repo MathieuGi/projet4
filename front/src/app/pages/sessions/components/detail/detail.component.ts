@@ -21,8 +21,8 @@ import { take } from 'rxjs';
 export class DetailComponent implements OnInit {
   public session: Session | undefined;
   public teacher: Teacher | undefined;
-  public isParticipate = false;
-  public isAdmin = false;
+  public isParticipate: boolean = false;
+  public isAdmin: boolean = false;
   public sessionId: string;
   public userId: string;
 
@@ -45,7 +45,7 @@ export class DetailComponent implements OnInit {
     this.fetchSession();
   }
 
-  public back() {
+  public back(): void {
     window.history.back();
   }
 
