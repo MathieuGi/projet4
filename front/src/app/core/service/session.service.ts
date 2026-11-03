@@ -7,7 +7,7 @@ import { SessionInformation } from '../models/sessionInformation.interface';
 })
 export class SessionService {
 
-  public isLogged = false;
+  public isLogged: boolean = false;
   public sessionInformation: SessionInformation | undefined;
 
   private isLoggedSubject = new BehaviorSubject<boolean>(this.isLogged);
