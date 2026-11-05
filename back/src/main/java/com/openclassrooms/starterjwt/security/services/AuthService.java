@@ -2,6 +2,7 @@ package com.openclassrooms.starterjwt.security.services;
 
 import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.payload.request.LoginRequest;
+import com.openclassrooms.starterjwt.payload.request.SignupRequest;
 import com.openclassrooms.starterjwt.payload.response.JwtResponse;
 import com.openclassrooms.starterjwt.security.jwt.JwtUtils;
 import com.openclassrooms.starterjwt.services.UserService;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +21,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public JwtResponse login(LoginRequest loginRequest){
@@ -38,5 +41,10 @@ public class AuthService {
                 userDetails.getFirstName(),
                 userDetails.getLastName(),
                 user.isAdmin());
+    }
+
+    public void register(SignupRequest signUpRequest) {
+        String encodedPassword = passwordEncoder.encode(signUpRequest.getPassword());
+        userService.save(signUpRequest, encodedPassword);
     }
 }
