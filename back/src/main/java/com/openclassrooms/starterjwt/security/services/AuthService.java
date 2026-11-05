@@ -1,11 +1,10 @@
 package com.openclassrooms.starterjwt.security.services;
 
-import com.openclassrooms.starterjwt.exception.NotFoundException;
 import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.payload.request.LoginRequest;
 import com.openclassrooms.starterjwt.payload.response.JwtResponse;
-import com.openclassrooms.starterjwt.repository.UserRepository;
 import com.openclassrooms.starterjwt.security.jwt.JwtUtils;
+import com.openclassrooms.starterjwt.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Transactional
     public JwtResponse login(LoginRequest loginRequest){
@@ -30,9 +29,8 @@ public class AuthService {
         String jwt = jwtUtils.generateJwtToken(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        User user =
-                this.userRepository.findByEmail(userDetails.getUsername()).orElseThrow(()-> new NotFoundException(
-                        "This user doesn't exists"));
+
+        User user = this.userService.findByEmail(userDetails.getUsername());
 
         return new JwtResponse(jwt,
                 userDetails.getId(),

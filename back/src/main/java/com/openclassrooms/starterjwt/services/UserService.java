@@ -2,6 +2,7 @@ package com.openclassrooms.starterjwt.services;
 
 import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.repository.UserRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,5 +19,10 @@ public class UserService {
 
     public User findById(Long id) {
         return this.userRepository.findById(id).orElse(null);
+    }
+
+    public User findByEmail(String email) {
+        return this.userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException(
+                "This user doesn't exist"));
     }
 }
