@@ -1,8 +1,10 @@
 package com.openclassrooms.starterjwt.controllers;
 
+import com.openclassrooms.starterjwt.exception.BadRequestException;
 import com.openclassrooms.starterjwt.mapper.UserMapper;
 import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.services.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,30 +19,20 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserController {
     private final UserMapper userMapper;
     private final UserService userService;
 
-
-    public UserController(UserService userService,
-                          UserMapper userMapper) {
-        this.userMapper = userMapper;
-        this.userService = userService;
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable("id") String id) {
+        User user;
         try {
-            User user = this.userService.findById(Long.valueOf(id));
-
-            if (user == null) {
-                return ResponseEntity.notFound().build();
-            }
-
-            return ResponseEntity.ok().body(this.userMapper.toDto(user));
+            user = this.userService.findById(Long.valueOf(id));
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().build();
+            throw new BadRequestException("User id should be a number");
         }
+        return ResponseEntity.ok().body(this.userMapper.toDto(user));
     }
 
     @DeleteMapping("{id}")

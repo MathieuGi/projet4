@@ -4,6 +4,7 @@ import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.payload.request.SignupRequest;
 import com.openclassrooms.starterjwt.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        return this.userRepository.findById(id).orElse(null);
+        return this.userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("No user with this id"));
     }
 
     public User findByEmail(String email) {
