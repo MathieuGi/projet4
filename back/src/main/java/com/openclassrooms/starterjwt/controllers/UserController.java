@@ -1,21 +1,14 @@
 package com.openclassrooms.starterjwt.controllers;
 
+import com.openclassrooms.starterjwt.dto.UserDto;
 import com.openclassrooms.starterjwt.exception.BadRequestException;
 import com.openclassrooms.starterjwt.mapper.UserMapper;
 import com.openclassrooms.starterjwt.models.User;
+import com.openclassrooms.starterjwt.payload.response.MessageResponse;
 import com.openclassrooms.starterjwt.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Objects;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -25,10 +18,11 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable("id") String id) {
+    public ResponseEntity<UserDto> findById(@PathVariable("id") String id) {
         User user;
         try {
-            user = this.userService.findById(Long.valueOf(id));
+            Long idValue = this.pathIdToLong(id);
+            user = this.userService.findById(idValue);
         } catch (NumberFormatException e) {
             throw new BadRequestException("User id should be a number");
         }
@@ -36,24 +30,21 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<?> save(@PathVariable("id") String id) {
+    public ResponseEntity<MessageResponse> save(@PathVariable("id") String id) {
         try {
-            User user = this.userService.findById(Long.valueOf(id));
-
-            if (user == null) {
-                return ResponseEntity.notFound().build();
-            }
-
-            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-            if (!Objects.equals(userDetails.getUsername(), user.getEmail())) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-
-            this.userService.delete(Long.parseLong(id));
-            return ResponseEntity.ok().build();
+            Long idValue = this.pathIdToLong(id);
+            this.userService.delete(idValue);
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().build();
+            throw new BadRequestException("User id should be a number");
+        }
+        return ResponseEntity.ok().body(new MessageResponse("User successfully created"));
+    }
+
+    private Long pathIdToLong(String id) {
+        try {
+            return Long.valueOf(id);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("User id should be a number");
         }
     }
 }
