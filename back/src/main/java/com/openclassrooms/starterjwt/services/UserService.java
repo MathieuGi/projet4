@@ -7,6 +7,8 @@ import com.openclassrooms.starterjwt.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,7 +20,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    
+
     public void delete(Long id) {
         User user = this.findById(id);
 
@@ -52,5 +54,15 @@ public class UserService {
                 false);
 
         userRepository.save(user);
+    }
+
+    public User me() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String currentUserName = authentication.getName();
+            return userRepository.findByEmail(currentUserName).orElseThrow(() -> new UsernameNotFoundException(
+                    "This user doesn't exist"));
+        }
+        return null;
     }
 }
