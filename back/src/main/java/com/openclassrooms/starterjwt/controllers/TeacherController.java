@@ -1,8 +1,11 @@
 package com.openclassrooms.starterjwt.controllers;
 
+import com.openclassrooms.starterjwt.dto.TeacherDto;
+import com.openclassrooms.starterjwt.exception.BadRequestException;
 import com.openclassrooms.starterjwt.mapper.TeacherMapper;
 import com.openclassrooms.starterjwt.models.Teacher;
 import com.openclassrooms.starterjwt.services.TeacherService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,36 +16,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/teacher")
+@RequiredArgsConstructor
 public class TeacherController {
     private final TeacherMapper teacherMapper;
     private final TeacherService teacherService;
 
-
-    public TeacherController(TeacherService teacherService,
-                             TeacherMapper teacherMapper) {
-        this.teacherMapper = teacherMapper;
-        this.teacherService = teacherService;
-    }
-
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable("id") String id) {
+    public ResponseEntity<TeacherDto> findById(@PathVariable("id") String id) {
         try {
             Teacher teacher = this.teacherService.findById(Long.valueOf(id));
-
-            if (teacher == null) {
-                return ResponseEntity.notFound().build();
-            }
-
-            return ResponseEntity.ok().body(this.teacherMapper.toDto(teacher));
+            return ResponseEntity.ok(this.teacherMapper.toDto(teacher));
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().build();
+            throw new BadRequestException("Teacher id should be a number");
         }
     }
 
     @GetMapping()
-    public ResponseEntity<?> findAll() {
+    public ResponseEntity<List<TeacherDto>> findAll() {
         List<Teacher> teachers = this.teacherService.findAll();
 
-        return ResponseEntity.ok().body(this.teacherMapper.toDto(teachers));
+        return ResponseEntity.ok(this.teacherMapper.toDto(teachers));
     }
 }

@@ -26,7 +26,7 @@ public class UserController {
         } catch (NumberFormatException e) {
             throw new BadRequestException("User id should be a number");
         }
-        return ResponseEntity.ok().body(this.userMapper.toDto(user));
+        return ResponseEntity.ok(this.userMapper.toDto(user));
     }
 
     @DeleteMapping("{id}")
@@ -37,7 +37,7 @@ public class UserController {
         } catch (NumberFormatException e) {
             throw new BadRequestException("User id should be a number");
         }
-        return ResponseEntity.ok().body(new MessageResponse("User successfully created"));
+        return ResponseEntity.ok(new MessageResponse("User successfully created"));
     }
 
     private Long pathIdToLong(String id) {
