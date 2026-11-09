@@ -1,16 +1,14 @@
 package com.openclassrooms.starterjwt.controllers;
 
+import com.openclassrooms.starterjwt.dto.ErrorResponse;
 import com.openclassrooms.starterjwt.dto.TeacherDto;
-import com.openclassrooms.starterjwt.exception.BadRequestException;
 import com.openclassrooms.starterjwt.mapper.TeacherMapper;
 import com.openclassrooms.starterjwt.models.Teacher;
 import com.openclassrooms.starterjwt.services.TeacherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,18 +21,19 @@ public class TeacherController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TeacherDto> findById(@PathVariable("id") String id) {
-        try {
-            Teacher teacher = this.teacherService.findById(Long.valueOf(id));
-            return ResponseEntity.ok(this.teacherMapper.toDto(teacher));
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Teacher id should be a number");
-        }
+        Teacher teacher = this.teacherService.findById(Long.valueOf(id));
+        return ResponseEntity.ok(this.teacherMapper.toDto(teacher));
     }
 
     @GetMapping()
     public ResponseEntity<List<TeacherDto>> findAll() {
         List<Teacher> teachers = this.teacherService.findAll();
-
         return ResponseEntity.ok(this.teacherMapper.toDto(teachers));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NumberFormatException.class)
+    public ErrorResponse NumberFormatException() {
+        return new ErrorResponse("BAD_REQUEST", "Teacher id should be a number");
     }
 }

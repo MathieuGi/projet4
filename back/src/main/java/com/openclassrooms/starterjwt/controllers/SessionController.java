@@ -1,8 +1,8 @@
 package com.openclassrooms.starterjwt.controllers;
 
 
+import com.openclassrooms.starterjwt.dto.ErrorResponse;
 import com.openclassrooms.starterjwt.dto.SessionDto;
-import com.openclassrooms.starterjwt.exception.BadRequestException;
 import com.openclassrooms.starterjwt.mapper.SessionMapper;
 import com.openclassrooms.starterjwt.models.Session;
 import com.openclassrooms.starterjwt.payload.response.MessageResponse;
@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.format.annotation.NumberFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,74 +30,50 @@ public class SessionController {
     @GetMapping("/{id}")
     @NumberFormat
     public ResponseEntity<SessionDto> findById(@PathVariable("id") String id) {
-        try {
-            Session session = this.sessionService.getById(Long.valueOf(id));
-            return ResponseEntity.ok(this.sessionMapper.toDto(session));
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Session id should be a number");
-        }
+        Session session = this.sessionService.getById(Long.valueOf(id));
+        return ResponseEntity.ok(this.sessionMapper.toDto(session));
     }
 
     @GetMapping()
     public ResponseEntity<List<SessionDto>> findAll() {
         List<Session> sessions = this.sessionService.findAll();
-
         return ResponseEntity.ok(this.sessionMapper.toDto(sessions));
     }
 
     @PostMapping()
     public ResponseEntity<SessionDto> create(@Valid @RequestBody SessionDto sessionDto) {
         Session session = this.sessionService.create(this.sessionMapper.toEntity(sessionDto));
-
         return ResponseEntity.ok().body(this.sessionMapper.toDto(session));
     }
 
     @PutMapping("{id}")
     public ResponseEntity<SessionDto> update(@PathVariable("id") String id, @Valid @RequestBody SessionDto sessionDto) {
-        Session session;
-
-        try {
-            session = this.sessionService.update(Long.parseLong(id), this.sessionMapper.toEntity(sessionDto));
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Session id should be a number");
-        }
-
+        Session session = this.sessionService.update(Long.parseLong(id), this.sessionMapper.toEntity(sessionDto));
         return ResponseEntity.ok(this.sessionMapper.toDto(session));
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<MessageResponse> delete(@PathVariable("id") String id) {
-        try {
-            long idValue = Long.parseLong(id);
-            this.sessionService.delete(idValue);
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Session id should be a number");
-        }
-
+        this.sessionService.delete(Long.parseLong(id));
         return ResponseEntity.ok(new MessageResponse("Session successfully deleted"));
 
     }
 
     @PostMapping("{id}/participate/me")
     public ResponseEntity<MessageResponse> participate(@PathVariable("id") String id) {
-        try {
-            long sessionId = Long.parseLong(id);
-            this.sessionService.participate(sessionId, userService.me());
-
-            return ResponseEntity.ok(new MessageResponse("You have been registered for this session"));
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Session id should be a number");
-        }
+        this.sessionService.participate(Long.parseLong(id), userService.me());
+        return ResponseEntity.ok(new MessageResponse("You have been registered for this session"));
     }
 
     @DeleteMapping("{id}/participate/me")
     public ResponseEntity<MessageResponse> noLongerParticipate(@PathVariable("id") String id) {
-        try {
-            this.sessionService.noLongerParticipate(Long.parseLong(id), userService.me());
+        this.sessionService.noLongerParticipate(Long.parseLong(id), userService.me());
+        return ResponseEntity.ok(new MessageResponse("You have been unregistered for this session"));
+    }
 
-            return ResponseEntity.ok(new MessageResponse("You have been unregistered for this session"));
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Session id should be a number");
-        }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NumberFormatException.class)
+    public ErrorResponse numberFormatExceptionHandler() {
+        return new ErrorResponse("BAD_REQUEST", "Session id should be a number");
     }
 }
