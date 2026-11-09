@@ -33,14 +33,14 @@ export class SessionApiService {
 
   public participate(id: string, userId: string): Observable<void> {
     return this.httpClient.post<void>(
-      `${this.pathService}/${id}/participate/${userId}`,
+      `${this.pathService}/${id}/participate/me`,
       null,
     );
   }
 
   public unParticipate(id: string, userId: string): Observable<void> {
     return this.httpClient.delete<void>(
-      `${this.pathService}/${id}/participate/${userId}`,
+      `${this.pathService}/${id}/participate/me`,
     );
   }
 }
